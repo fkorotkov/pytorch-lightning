@@ -25,7 +25,6 @@ from tests.base import (
 
 
 def test_dataloader_config_errors(tmpdir):
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,
@@ -99,7 +98,6 @@ def test_dataloader_config_errors(tmpdir):
 
 def test_multiple_val_dataloader(tmpdir):
     """Verify multiple val_dataloader."""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,
@@ -137,7 +135,6 @@ def test_multiple_val_dataloader(tmpdir):
 
 def test_multiple_test_dataloader(tmpdir):
     """Verify multiple test_dataloader."""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,
@@ -177,7 +174,6 @@ def test_multiple_test_dataloader(tmpdir):
 
 def test_train_dataloaders_passed_to_fit(tmpdir):
     """Verify that train dataloader can be passed to fit """
-    tutils.reset_seed()
 
     class CurrentTestModel(LightTrainDataloader, TestModelBase):
         pass
@@ -203,7 +199,6 @@ def test_train_dataloaders_passed_to_fit(tmpdir):
 
 def test_train_val_dataloaders_passed_to_fit(tmpdir):
     """ Verify that train & val dataloader can be passed to fit """
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,
@@ -236,7 +231,6 @@ def test_train_val_dataloaders_passed_to_fit(tmpdir):
 
 def test_all_dataloaders_passed_to_fit(tmpdir):
     """Verify train, val & test dataloader can be passed to fit """
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,
@@ -277,7 +271,6 @@ def test_all_dataloaders_passed_to_fit(tmpdir):
 
 def test_multiple_dataloaders_passed_to_fit(tmpdir):
     """Verify that multiple val & test dataloaders can be passed to fit."""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightningTestModel,
@@ -316,7 +309,6 @@ def test_multiple_dataloaders_passed_to_fit(tmpdir):
 
 def test_mixing_of_dataloader_options(tmpdir):
     """Verify that dataloaders can be passed to fit"""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,
@@ -358,7 +350,6 @@ def test_mixing_of_dataloader_options(tmpdir):
 
 def test_inf_train_dataloader(tmpdir):
     """Test inf train data loader (e.g. IterableDataset)"""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightInfTrainDataloader,
@@ -400,7 +391,6 @@ def test_inf_train_dataloader(tmpdir):
 
 def test_inf_val_dataloader(tmpdir):
     """Test inf val data loader (e.g. IterableDataset)"""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightInfValDataloader,
@@ -433,7 +423,6 @@ def test_inf_val_dataloader(tmpdir):
 
 def test_inf_test_dataloader(tmpdir):
     """Test inf test data loader (e.g. IterableDataset)"""
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightInfTestDataloader,
@@ -468,7 +457,6 @@ def test_inf_test_dataloader(tmpdir):
 
 def test_error_on_zero_len_dataloader(tmpdir):
     """ Test that error is raised if a zero-length dataloader is defined """
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightZeroLenDataloader,
@@ -492,7 +480,6 @@ def test_error_on_zero_len_dataloader(tmpdir):
 @pytest.mark.skipif(platform.system() == 'Windows', reason='Does not apply to Windows platform.')
 def test_warning_with_few_workers(tmpdir):
     """ Test that error is raised if dataloader with only a few workers is used """
-    tutils.reset_seed()
 
     class CurrentTestModel(
         LightTrainDataloader,

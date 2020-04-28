@@ -18,7 +18,6 @@ from tests.base import (
 
 def test_optimizer_with_scheduling(tmpdir):
     """ Verify that learning rate scheduling is working """
-    tutils.reset_seed()
 
     class CurrentTestModel(
             LightTestOptimizerWithSchedulingMixin,
@@ -57,7 +56,6 @@ def test_optimizer_with_scheduling(tmpdir):
 
 def test_multi_optimizer_with_scheduling(tmpdir):
     """ Verify that learning rate scheduling is working """
-    tutils.reset_seed()
 
     class CurrentTestModel(
             LightTestMultipleOptimizersWithSchedulingMixin,
@@ -100,7 +98,6 @@ def test_multi_optimizer_with_scheduling(tmpdir):
 
 
 def test_multi_optimizer_with_scheduling_stepping(tmpdir):
-    tutils.reset_seed()
 
     class CurrentTestModel(
             LightTestOptimizersWithMixedSchedulingMixin,
@@ -147,7 +144,6 @@ def test_multi_optimizer_with_scheduling_stepping(tmpdir):
 
 
 def test_reduce_lr_on_plateau_scheduling(tmpdir):
-    tutils.reset_seed()
 
     class CurrentTestModel(
             LightTestReduceLROnPlateauMixin,
@@ -179,7 +175,6 @@ def test_reduce_lr_on_plateau_scheduling(tmpdir):
 
 
 def test_optimizer_return_options():
-    tutils.reset_seed()
 
     trainer = Trainer()
     model = EvalModelTemplate(tutils.get_default_hparams())
@@ -237,7 +232,6 @@ def test_optimizer_return_options():
 
 
 def test_none_optimizer_warning():
-    tutils.reset_seed()
 
     trainer = Trainer()
 
@@ -249,7 +243,6 @@ def test_none_optimizer_warning():
 
 
 def test_none_optimizer(tmpdir):
-    tutils.reset_seed()
 
     class CurrentTestModel(
             LightTestNoneOptimizerMixin,

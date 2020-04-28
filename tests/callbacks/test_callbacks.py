@@ -212,8 +212,6 @@ def test_trainer_callback_system(tmpdir):
 
 def test_early_stopping_no_val_step(tmpdir):
     """Test that early stopping callback falls back to training metrics when no validation defined."""
-    tutils.reset_seed()
-
     class ModelWithoutValStep(LightTrainDataloader, TestModelBase):
 
         def training_step(self, *args, **kwargs):
@@ -222,8 +220,7 @@ def test_early_stopping_no_val_step(tmpdir):
             output.update({'my_train_metric': loss})
             return output
 
-    hparams = tutils.get_default_hparams()
-    model = ModelWithoutValStep(hparams)
+    model = ModelWithoutValStep(tutils.get_default_hparams())
 
     stopping = EarlyStopping(monitor='my_train_metric', min_delta=0.1)
     trainer_options = dict(
@@ -250,10 +247,7 @@ def test_pickling(tmpdir):
 
 
 def test_model_checkpoint_with_non_string_input(tmpdir):
-    """ Test that None in checkpoint callback is valid and that chkp_path is
-        set correctly """
-    tutils.reset_seed()
-
+    """ Test that None in checkpoint callback is valid and that chkp_path is set correctly """
     class CurrentTestModel(LightTrainDataloader, TestModelBase):
         pass
 
@@ -267,7 +261,7 @@ def test_model_checkpoint_with_non_string_input(tmpdir):
                       overfit_pct=0.20,
                       max_epochs=5
                       )
-    result = trainer.fit(model)
+    trainer.fit(model)
 
     # These should be different if the dirpath has be overridden
     assert trainer.ckpt_path != trainer.default_root_dir

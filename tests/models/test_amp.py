@@ -14,11 +14,6 @@ from tests.base import LightningTestModel, EvalModelTemplate
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="test requires GPU machine")
 def test_amp_single_gpu(tmpdir, backend):
     """Make sure DP/DDP + AMP work."""
-    tutils.reset_seed()
-
-
-    model = EvalModelTemplate(tutils.get_default_hparams())
-
     trainer_options = dict(
         default_root_dir=tmpdir,
         max_epochs=1,
@@ -27,6 +22,7 @@ def test_amp_single_gpu(tmpdir, backend):
         precision=16
     )
 
+    model = EvalModelTemplate(tutils.get_default_hparams())
     # tutils.run_model_test(trainer_options, model)
 
     trainer = Trainer(**trainer_options)
@@ -40,7 +36,6 @@ def test_amp_single_gpu(tmpdir, backend):
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
 def test_amp_multi_gpu(tmpdir, backend):
     """Make sure DP/DDP + AMP work."""
-    tutils.reset_seed()
     tutils.set_random_master_port()
 
     model = EvalModelTemplate(tutils.get_default_hparams())
@@ -64,8 +59,6 @@ def test_amp_multi_gpu(tmpdir, backend):
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
 def test_amp_gpu_ddp_slurm_managed(tmpdir):
     """Make sure DDP + AMP work."""
-    tutils.reset_seed()
-
     # simulate setting slurm flags
     tutils.set_random_master_port()
     os.environ['SLURM_LOCALID'] = str(0)
@@ -107,8 +100,6 @@ def test_amp_gpu_ddp_slurm_managed(tmpdir):
 
 def test_cpu_model_with_amp(tmpdir):
     """Make sure model trains on CPU."""
-    tutils.reset_seed()
-
     trainer_options = dict(
         default_root_dir=tmpdir,
         progress_bar_refresh_rate=0,
