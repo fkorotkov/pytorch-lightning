@@ -28,8 +28,8 @@ PATH_ROOT = os.path.join(PATH_HERE, '..', '..', '..', '..')
 sys.path.insert(0, os.path.abspath(PATH_ROOT))
 
 from pytorch_lightning.callbacks import ModelCheckpoint  # noqa: E402
-import tests.base.utils as tutils  # noqa: E402
-from tests.base import EvalModelTemplate
+from tests.base import EvalModelTemplate  # noqa: E402
+from tests.base.utils import set_random_master_port, get_default_hparams, run_model_test  # noqa: E402
 
 
 parser = argparse.ArgumentParser()
@@ -38,13 +38,13 @@ parser.add_argument('--trainer-options', required=True)
 
 def run_test_from_config(trainer_options):
     """Trains the default model with the given config."""
-    tutils.set_random_master_port()
+    set_random_master_port()
 
     ckpt_path = trainer_options['default_root_dir']
     trainer_options.update(checkpoint_callback=ModelCheckpoint(ckpt_path))
 
-    model = EvalModelTemplate(tutils.get_default_hparams())
-    tutils.run_model_test(trainer_options, model, version=0, with_hpc=False)
+    model = EvalModelTemplate(get_default_hparams())
+    run_model_test(trainer_options, model, version=0, with_hpc=False)
 
     # Horovod should be initialized following training. If not, this will raise an exception.
     assert hvd.size() == 2
