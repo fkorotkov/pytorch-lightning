@@ -55,7 +55,7 @@ def test_wrong_validation_settings(tmpdir):
     """
     tutils.reset_seed()
     hparams = tutils.get_default_hparams()
-    trainer = Trainer(efault_root_dir=tmpdir, max_epochs=1)
+    trainer = Trainer(default_root_dir=tmpdir, max_epochs=1)
 
     # check val_dataloader -> val_step
     with pytest.raises(MisconfigurationException):
