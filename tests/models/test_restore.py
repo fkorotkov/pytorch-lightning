@@ -9,11 +9,7 @@ import tests.base.utils as tutils
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
-from tests.base import (
-    LightningTestModel,
-    LightningTestModelWithoutHyperparametersArg,
-    LightningTestModelWithUnusedHyperparametersArg
-)
+from tests.base import EvalModelTemplate
 
 
 @pytest.mark.spawn
@@ -23,8 +19,7 @@ def test_running_test_pretrained_model_distrib(tmpdir, backend):
     """Verify `test()` on pretrained model."""
     tutils.set_random_master_port()
 
-    hparams = tutils.get_default_hparams()
-    model = LightningTestModel(hparams)
+    model = EvalModelTemplate(tutils.get_default_hparams())
 
     # exp file to get meta
     logger = tutils.get_default_logger(tmpdir)
@@ -53,7 +48,7 @@ def test_running_test_pretrained_model_distrib(tmpdir, backend):
     assert result == 1, 'training failed to complete'
     pretrained_model = tutils.load_model(logger,
                                          trainer.checkpoint_callback.dirpath,
-                                         module_class=LightningTestModel)
+                                         module_class=EvalModelTemplate)
 
     # run test set
     new_trainer = Trainer(**trainer_options)
@@ -72,8 +67,7 @@ def test_running_test_pretrained_model_distrib(tmpdir, backend):
 
 def test_running_test_pretrained_model_cpu(tmpdir):
     """Verify test() on pretrained model."""
-    hparams = tutils.get_default_hparams()
-    model = LightningTestModel(hparams)
+    model = EvalModelTemplate(tutils.get_default_hparams())
 
     # logger file to get meta
     logger = tutils.get_default_logger(tmpdir)
@@ -97,7 +91,7 @@ def test_running_test_pretrained_model_cpu(tmpdir):
     # correct result and ok accuracy
     assert result == 1, 'training failed to complete'
     pretrained_model = tutils.load_model(
-        logger, trainer.checkpoint_callback.dirpath, module_class=LightningTestModel
+        logger, trainer.checkpoint_callback.dirpath, module_class=EvalModelTemplate
     )
 
     new_trainer = Trainer(**trainer_options)
@@ -110,7 +104,7 @@ def test_running_test_pretrained_model_cpu(tmpdir):
 def test_load_model_from_checkpoint(tmpdir):
     """Verify test() on pretrained model."""
     hparams = tutils.get_default_hparams()
-    model = LightningTestModel(hparams)
+    model = EvalModelTemplate(hparams)
 
     trainer_options = dict(
         progress_bar_refresh_rate=0,
@@ -131,7 +125,7 @@ def test_load_model_from_checkpoint(tmpdir):
 
     # load last checkpoint
     last_checkpoint = sorted(glob.glob(os.path.join(trainer.checkpoint_callback.dirpath, "*.ckpt")))[-1]
-    pretrained_model = LightningTestModel.load_from_checkpoint(last_checkpoint)
+    pretrained_model = EvalModelTemplate.load_from_checkpoint(last_checkpoint)
 
     # test that hparams loaded correctly
     for k, v in vars(hparams).items():
@@ -152,7 +146,7 @@ def test_load_model_from_checkpoint(tmpdir):
 def test_dp_resume(tmpdir):
     """Make sure DP continues training correctly."""
     hparams = tutils.get_default_hparams()
-    model = LightningTestModel(hparams)
+    model = EvalModelTemplate(hparams)
 
     trainer_options = dict(
         max_epochs=1,
@@ -210,7 +204,7 @@ def test_dp_resume(tmpdir):
         tutils.run_prediction(dataloader, dp_model, dp=True)
 
     # new model
-    model = LightningTestModel(hparams)
+    model = EvalModelTemplate(hparams)
     model.on_train_start = assert_good_acc
 
     # fit new model which should load hpc weights
@@ -223,8 +217,7 @@ def test_dp_resume(tmpdir):
 
 def test_model_saving_loading(tmpdir):
     """Tests use case where trainer saves the model, and user loads it from tags independently."""
-    hparams = tutils.get_default_hparams()
-    model = LightningTestModel(hparams)
+    model = EvalModelTemplate(tutils.get_default_hparams())
 
     # logger file to get meta
     logger = tutils.get_default_logger(tmpdir)
@@ -265,7 +258,7 @@ def test_model_saving_loading(tmpdir):
     # load new model
     tags_path = tutils.get_data_path(logger, path_dir=tmpdir)
     tags_path = os.path.join(tags_path, 'meta_tags.csv')
-    model_2 = LightningTestModel.load_from_checkpoint(
+    model_2 = EvalModelTemplate.load_from_checkpoint(
         checkpoint_path=new_weights_path,
         tags_csv=tags_path
     )
@@ -289,22 +282,27 @@ def test_load_model_with_missing_hparams(tmpdir):
     # fit model
     trainer = Trainer(**trainer_options)
 
-    model = LightningTestModelWithoutHyperparametersArg()
+    class CurrentModel(EvalModelTemplate):
+        def __init__(self):
+            hparams = tutils.get_default_hparams()
+            super().__init__(hparams)
+
+    model = CurrentModel()
     trainer.fit(model)
     last_checkpoint = sorted(glob.glob(os.path.join(trainer.checkpoint_callback.dirpath, "*.ckpt")))[-1]
 
     # try to load a checkpoint that has hparams but model is missing hparams arg
     with pytest.raises(MisconfigurationException, match=r".*__init__ is missing the argument 'hparams'.*"):
-        LightningTestModelWithoutHyperparametersArg.load_from_checkpoint(last_checkpoint)
+        CurrentModel.load_from_checkpoint(last_checkpoint)
 
     # create a checkpoint without hyperparameters
     # if the model does not take a hparams argument, it should not throw an error
     ckpt = torch.load(last_checkpoint)
     del(ckpt['hparams'])
     torch.save(ckpt, last_checkpoint)
-    LightningTestModelWithoutHyperparametersArg.load_from_checkpoint(last_checkpoint)
+    CurrentModel.load_from_checkpoint(last_checkpoint)
 
     # load checkpoint without hparams again
     # warn if user's model has hparams argument
     with pytest.warns(UserWarning, match=r".*Will pass in an empty Namespace instead."):
-        LightningTestModelWithUnusedHyperparametersArg.load_from_checkpoint(last_checkpoint)
+        CurrentModel.load_from_checkpoint(last_checkpoint)
